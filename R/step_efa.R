@@ -170,20 +170,23 @@ prep.step_efa <- function(x, training, info = NULL, ...) {
 #' @export
 bake.step_efa <- function(object, new_data, ...) {
 
-  efa_vars <- colnames(object$res$r)
+  efa_vars <- rownames(object$res$weights)
 
 print(efa_vars)
 
-print(new_data[,efa_vars])
+
   comps <- stats::predict(eval(object$res), data = new_data[,efa_vars])
 
-  colnames(comps) <- paste0("Factor", 1:object$res$factors)
+  colnames(comps) <- paste0("Factor", 1:ncol(object$res$weights))
 
   new_data <- dplyr::bind_cols(new_data, tibble::as_tibble(comps))
 
   tibble::as_tibble(new_data)
 
 }
+
+
+
 
 #' @rdname tunable.step
 #' @export
