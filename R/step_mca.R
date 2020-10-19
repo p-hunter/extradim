@@ -178,10 +178,11 @@ prep.step_mca <- function(x, training, info = NULL, ...) {
 bake.step_mca <- function(object, new_data, ...) {
 
   mca_vars <- unique(gsub("\\..*", "", x=rownames(object$res$cs)))
+  print(mca_vars)
 
   nfs <- stats::predict(eval(object$res), newdata = new_data[,mca_vars])
 
-  colnames(nfs) <- paste0("MC", 1:length(object$res$d))
+  colnames(nfs) <- paste0("MC", 1:ncol(nfs))
 
   new_data <- dplyr::bind_cols(new_data, tibble::as_tibble(nfs))
 
@@ -189,14 +190,24 @@ bake.step_mca <- function(object, new_data, ...) {
 
 }
 
-
+#' @export
+num_f <- function(range = c(2, 5), trans = NULL) {
+  dials::new_quant_param(
+    type = "integer",
+    range = range,
+    inclusive = c(TRUE, TRUE),
+    trans = trans,
+    label = c(num_f = "MCA Comps"),
+    finalize = NULL
+  )
+}
 
 #' @rdname required_pkgs.step
 #' @export
 tunable.step_mca <-  function(x, ...) {
   tibble::tibble(
     name = "num_f",
-    call_info = list(list(pkg = "dials", fun = "num_f", range = c(1L, 5L))),
+    call_info = list(list(pkg = "extradim", fun = "num_f", range = c(2L, 5L))),
     source = "recipe",
     component = "step_mca",
     component_id = x$id
