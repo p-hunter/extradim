@@ -196,7 +196,7 @@ bake.step_mca <- function(object, new_data, ...) {
 tunable.step_mca <-  function(x, ...) {
   tibble::tibble(
     name = "num_f",
-    call_info = list(list(pkg = "dials", fun = "num_comp", range = c(1L, 5L))),
+    call_info = list(list(pkg = "dials", fun = "num_f", range = c(1L, 5L))),
     source = "recipe",
     component = "step_mca",
     component_id = x$id
