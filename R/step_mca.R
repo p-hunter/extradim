@@ -216,6 +216,13 @@ tunable.step_mca <-  function(x, ...) {
 
 
 
+#' @rdname required_pkgs.step
+#' @export
+required_pkgs.step_efa <- function(x, ...) {
+  c("MASS")
+}
+
+
 
 
 

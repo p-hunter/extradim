@@ -2,9 +2,11 @@
 
 export(bake.step_efa)
 export(bake.step_mca)
+export(num_f)
 export(prep.step_efa)
 export(prep.step_mca)
 export(required_pkgs.step_efa)
+export(rotate)
 export(step_efa)
 export(step_mca)
 export(tunable.step_efa)
