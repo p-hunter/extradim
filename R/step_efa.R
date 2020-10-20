@@ -172,7 +172,7 @@ bake.step_efa <- function(object, new_data, ...) {
 
   efa_vars <- rownames(object$res$weights)
 
-print(efa_vars)
+  print(efa_vars)
 
 
   comps <- stats::predict(eval(object$res), data = new_data[,efa_vars])
@@ -185,15 +185,31 @@ print(efa_vars)
 
 }
 
+#' @rdname rotate
+#' @export
+rotate <- function(values = values_rotate) {
+  dials::new_quanl_param(
+    type = "character",
+    values = values,
+    default = "oblimin",
+    label = c(rotate = "Rotation"),
+    finalize = NULL
+  )
+}
 
-
+values_rotate <-  c("oblimin", "varimax", "quartimax", "bentlerT",
+                    "equamax", "varimin", "geominT", "bifactor",
+                    "Promax", "promax", "simplimax", "bentlerQ",
+                    "biquartmin", "cluster")
 
 #' @rdname tunable.step
 #' @export
 tunable.step_efa <-  function(x, ...) {
   tibble::tibble(
-    name = "num_comp",
-    call_info = list(list(pkg = "dials", fun = "num_comp", range = c(1L, 5L))),
+    name = c("num_comp","rotate"),
+    call_info = list(
+      list(pkg = "dials", fun = "num_comp", range = c(1L, 5L))),
+    list("pkg" = "dials", fun = "rotate", values = values_rotate),
     source = "recipe",
     component = "step_efa",
     component_id = x$id
@@ -206,7 +222,4 @@ tunable.step_efa <-  function(x, ...) {
 required_pkgs.step_efa <- function(x, ...) {
   c("psych", "GPArotation")
 }
-
-
-
 
