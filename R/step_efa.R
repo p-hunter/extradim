@@ -1,3 +1,8 @@
+
+
+
+
+
 #' Factor Analysis (Exploratory)
 #'
 #'`step_efa` creates a *specification* of a
@@ -86,14 +91,15 @@ step_efa <- function(
   role = "predictor",
   trained = FALSE,
   num_comp = 2,
+  rotate = "oblimin",
   res = NULL,
   prefix = "MC",
   skip = FALSE,
   id = recipes::rand_id("efa")
 ) {
-
+  
   terms <- recipes::ellipse_check(...)
-
+  
   recipes::add_step(
     recipe,
     step_efa_new(
@@ -101,6 +107,7 @@ step_efa <- function(
       role = role,
       trained = trained,
       num_comp = num_comp,
+      rotate = rotate,
       res = res,
       prefix = prefix,
       skip = skip,
@@ -115,6 +122,7 @@ step_efa_new <-  function(
   role,
   trained,
   num_comp,
+  rotate,
   options,
   res,
   prefix,
@@ -127,6 +135,7 @@ step_efa_new <-  function(
     role = role,
     trained = trained,
     num_comp = num_comp,
+    rotate = rotate,
     res = res,
     prefix = prefix,
     skip = skip,
@@ -136,53 +145,52 @@ step_efa_new <-  function(
 
 #' @export
 prep.step_efa <- function(x, training, info = NULL, ...) {
-
+  
   col_names <- recipes::terms_select(x$terms, info = info)
-
+  
   recipes::check_type(training[, col_names])
-
+  
   max_length <- length(col_names)
-
+  
   x$num_comp <- min(x$num_comp, max_length)
-
-  efa_call <- dplyr::expr(psych::fa( nfactors = x$num_comp))
-
+  
+  efa_call <- dplyr::expr(psych::fa(rotate = x$rotate,
+                                    nfactors = x$num_comp))
+  
   efa_call$r <- dplyr::expr(training[, col_names])
-
+  
   efa_obj <- eval(efa_call)
-
   step_efa_new(
     terms = x$terms,
     role = x$role,
     trained = TRUE,
     num_comp = x$num_comp,
+    rotate = x$rotate,
     res = efa_obj,
     prefix = x$prefix,
     skip = x$skip,
     id = x$id
   )
-
-
+  
+  
 }
 
 
 
 #' @export
 bake.step_efa <- function(object, new_data, ...) {
-
+  
   efa_vars <- rownames(object$res$weights)
-
-  print(efa_vars)
-
-
+  
+  
   comps <- stats::predict(eval(object$res), data = new_data[,efa_vars])
-
+  
   colnames(comps) <- paste0("Factor", 1:ncol(object$res$weights))
-
+  
   new_data <- dplyr::bind_cols(new_data, tibble::as_tibble(comps))
-
+  
   tibble::as_tibble(new_data)
-
+  
 }
 
 #' @rdname rotate
@@ -208,8 +216,8 @@ tunable.step_efa <-  function(x, ...) {
   tibble::tibble(
     name = c("num_comp","rotate"),
     call_info = list(
-      list(pkg = "dials", fun = "num_comp", range = c(1L, 5L))),
-    list("pkg" = "dials", fun = "rotate", values = values_rotate),
+      list(pkg = "dials", fun = "num_comp", range = c(1L, 5L)),
+    list(pkg = "dials", fun = "rotate", values = values_rotate)),
     source = "recipe",
     component = "step_efa",
     component_id = x$id
@@ -222,4 +230,3 @@ tunable.step_efa <-  function(x, ...) {
 required_pkgs.step_efa <- function(x, ...) {
   c("psych", "GPArotation")
 }
-
